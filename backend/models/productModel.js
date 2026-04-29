@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+// Product Schema model
 const productSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String, required: true },
@@ -12,6 +13,7 @@ const productSchema = new mongoose.Schema({
     date: { type: Number, required: true }
 })
 
+// If the product already exists in the mongoose use it otherwise create a new product.
 const productModel  = mongoose.models.product || mongoose.model("product",productSchema);
 
 export default productModel

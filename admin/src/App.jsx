@@ -13,14 +13,15 @@ export const backendUrl = import.meta.env.VITE_BACKEND_URL
 export const currency = '₹'
 
 const App = () => {
-
+  // useState hook is used to se initail token for the login session that decides whether the user is logged in or not.
   const [token, setToken] = useState(localStorage.getItem('token')?localStorage.getItem('token'):'');
-
+  // useEffect sets the localStorage of token whenever the token is updated.
   useEffect(()=>{
     localStorage.setItem('token',token)
   },[token])
 
   return (
+    //toastcontainer helps display messages and popups like success and failure
     <div className='bg-gray-50 min-h-screen'>
       <ToastContainer />
       {token === ""

@@ -27,7 +27,12 @@ const List = ({ token }) => {
   const removeProduct = async (id) => {
     try {
 
-      const response = await axios.post(backendUrl + '/api/product/remove', { id }, { headers: { token } })
+      const response = await axios.post(backendUrl + '/api/product/remove', { id }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        withCredentials: true
+      })
 
       if (response.data.success) {
         toast.success(response.data.message)
@@ -70,7 +75,7 @@ const List = ({ token }) => {
               <p>{item.name}</p>
               <p>{item.category}</p>
               <p>{currency}{item.price}</p>
-              <p onClick={()=>removeProduct(item._id)} className='text-right md:text-center cursor-pointer text-lg'>X</p>
+              <p onClick={() => removeProduct(item._id)} className='text-right md:text-center cursor-pointer text-lg'>X</p>
             </div>
           ))
         }

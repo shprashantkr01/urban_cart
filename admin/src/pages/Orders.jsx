@@ -18,7 +18,12 @@ const Orders = ({ token }) => {
 
     try {
 
-      const response = await axios.post(backendUrl + '/api/order/list', {}, { headers: { token } })
+      const response = await axios.post(backendUrl + '/api/order/list', {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        withCredentials: true
+      })
       if (response.data.success) {
         setOrders(response.data.orders.reverse())
       } else {
@@ -32,9 +37,9 @@ const Orders = ({ token }) => {
 
   }
 
-  const statusHandler = async ( event, orderId ) => {
+  const statusHandler = async (event, orderId) => {
     try {
-      const response = await axios.post(backendUrl + '/api/order/status' , {orderId, status:event.target.value}, { headers: {token}})
+      const response = await axios.post(backendUrl + '/api/order/status', { orderId, status: event.target.value }, { headers: { token } })
       if (response.data.success) {
         await fetchAllOrders()
       }
@@ -77,11 +82,11 @@ const Orders = ({ token }) => {
               <div>
                 <p className='text-sm sm:text-[15px]'>Items : {order.items.length}</p>
                 <p className='mt-3'>Method : {order.paymentMethod}</p>
-                <p>Payment : { order.payment ? 'Done' : 'Pending' }</p>
+                <p>Payment : {order.payment ? 'Done' : 'Pending'}</p>
                 <p>Date : {new Date(order.date).toLocaleDateString()}</p>
               </div>
               <p className='text-sm sm:text-[15px]'>{currency}{order.amount}</p>
-              <select onChange={(event)=>statusHandler(event,order._id)} value={order.status} className='p-2 font-semibold'>
+              <select onChange={(event) => statusHandler(event, order._id)} value={order.status} className='p-2 font-semibold'>
                 <option value="Order Placed">Order Placed</option>
                 <option value="Packing">Packing</option>
                 <option value="Shipped">Shipped</option>

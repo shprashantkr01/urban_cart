@@ -4,8 +4,10 @@ import App from './App.jsx'
 import './index.css'
 import { BrowserRouter } from 'react-router-dom'
 
+//createRoot().render() together mounts the App in the html DOM.
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <BrowserRouter>
+  //BrowserRouter enables the routing between different pages.
+  <BrowserRouter> 
     <App />
   </BrowserRouter>,
 )

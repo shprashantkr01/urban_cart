@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-
+// Oreder Schema Model.
 const orderSchema = new mongoose.Schema({
     userId: { type: String, required: true },
     items: { type: Array, required: true },
@@ -11,5 +11,6 @@ const orderSchema = new mongoose.Schema({
     date: {type: Number, required:true}
 })
 
+// If order exists use that otherwise create new order model.
 const orderModel = mongoose.models.order || mongoose.model('order',orderSchema)
 export default orderModel;

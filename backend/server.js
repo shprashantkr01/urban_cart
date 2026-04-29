@@ -7,16 +7,32 @@ import userRouter from './routes/userRoute.js'
 import productRouter from './routes/productRoute.js'
 import cartRouter from './routes/cartRoute.js'
 import orderRouter from './routes/orderRoute.js'
+import cookieParser from "cookie-parser";
 
 // App Config
 const app = express()
 const port = process.env.PORT || 4000
 connectDB()
 connectCloudinary()
-
+app.use(cookieParser());
 // middlewares
 app.use(express.json())
-app.use(cors())
+
+const allowedOrigins = [
+    "http://localhost:5173",
+    "http://localhost:5174"
+];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true
+}));
 
 // api endpoints
 app.use('/api/user',userRouter)
