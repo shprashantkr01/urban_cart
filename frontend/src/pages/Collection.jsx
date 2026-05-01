@@ -1,15 +1,3 @@
-// import React, { useContext, useEffect, useState } from 'react'
-// import { ShopContext } from '../context/ShopContext'
-// import { assets } from '../assets/assets';
-// import Title from '../components/Title';
-// import ProductItem from '../components/ProductItem';
-
-// const Collection = () => {
-
-//   const { products, search, showSearch } = useContext(ShopContext);
-//   const [showFilter, setShowFilter] = useState(false);
-//   const [filterProducts, setFilterProducts] = useState([]);
-//   const [category, setCategory] = useState([]);
 //   const [subCategory, setSubCategory] = useState([]);
 //   const [sortType, setSortType] = useState('relavent')
 //   const [aiFilters, setAiFilters] = useState(null);
@@ -179,6 +167,10 @@ const Collection = () => {
   // ── AI Search State ──────────────────────────────────────────
   const [aiFilters, setAiFilters] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [similarProducts, setSimilarProducts] = useState([]);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
+  const [similarExpanded, setSimilarExpanded] = useState(false);
+  const [recommendedExpanded, setRecommendedExpanded] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   // ── Toggle Handlers ──────────────────────────────────────────
@@ -236,6 +228,40 @@ const Collection = () => {
     }
   }
 
+  const getSimilarProducts = (filters, allProducts, currentIds) => {
+    if (!filters || (!filters.category && !filters.subCategory)) return [];
+
+    return allProducts
+      .filter((item) => {
+        if (currentIds.includes(item._id)) return false;
+        if (filters.subCategory) {
+          return item.category === filters.category && item.subCategory === filters.subCategory;
+        }
+        return item.category === filters.category;
+      })
+      .slice(0, 4);
+  };
+
+  const getRecommendedProducts = (filters, allProducts, currentIds) => {
+    if (!allProducts || allProducts.length === 0) return [];
+
+    const remainingProducts = allProducts.filter((item) => !currentIds.includes(item._id));
+    if (remainingProducts.length === 0) return [];
+
+    const scored = remainingProducts
+      .map((item) => ({
+        item,
+        score:
+          (filters?.category && item.category === filters.category ? 3 : 0) +
+          (filters?.subCategory && item.subCategory === filters.subCategory ? 2 : 0) +
+          (item.bestseller ? 2 : 0)
+      }))
+      .sort((a, b) => b.score - a.score || b.item.price - a.item.price)
+      .map((entry) => entry.item);
+
+    return scored.slice(0, 8);
+  };
+
   // ── AI Search Function ───────────────────────────────────────
   const fetchAISearch = async (query) => {
     setAiLoading(true);
@@ -245,11 +271,17 @@ const Collection = () => {
       if (res.data.success) {
         setFilterProducts(res.data.products);
         setAiFilters(res.data.filters);
+
+        const currentResultIds = res.data.products.map((product) => product._id);
+        setSimilarProducts(getSimilarProducts(res.data.filters, products, currentResultIds));
+        setRecommendedProducts(getRecommendedProducts(res.data.filters, products, currentResultIds));
       }
 
     } catch (error) {
       toast.error("AI search failed, showing regular results");
       setAiFilters(null);
+      setSimilarProducts([]);
+      setRecommendedProducts([]);
       applyFilter(); // graceful fallback
     } finally {
       setAiLoading(false);
@@ -272,6 +304,12 @@ const Collection = () => {
     } else {
       // Empty or too short → clear AI state, use normal filter
       setAiFilters(null);
+      setSimilarProducts([]);
+      setRecommendedProducts([]);
+      setSimilarExpanded(false);
+      setRecommendedExpanded(false);
+      setSimilarExpanded(false);
+      setRecommendedExpanded(false);
       applyFilter();
     }
   }, [debouncedSearch]);
@@ -346,7 +384,7 @@ const Collection = () => {
         {/* ── AI Loading Indicator ── */}
         {aiLoading && (
           <div className='w-full text-center py-3 text-sm text-gray-400'>
-            🔍 Searching with AI...
+            🔍 Searching With AI...
           </div>
         )}
 
@@ -391,6 +429,40 @@ const Collection = () => {
             <ProductItem key={index} name={item.name} id={item._id} price={item.price} image={item.image} />
           ))}
         </div>
+
+        {/* ── Similar Products ── */}
+        {similarProducts.length > 0 && !aiLoading && (
+          <div className='mb-6 mt-8'>
+            <div className='flex items-center justify-between mb-3'>
+              <div>
+                <h2 className='text-lg font-semibold'>Similar Products</h2>
+                <p className='text-sm text-gray-500'>Products matched by category and type.</p>
+              </div>
+            </div>
+            <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+              {similarProducts.map((item) => (
+                <ProductItem key={item._id} name={item.name} id={item._id} price={item.price} image={item.image} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Recommended Products ── */}
+        {recommendedProducts.length > 0 && !aiLoading && (
+          <div className='mb-6'>
+            <div className='flex items-center justify-between mb-3'>
+              <div>
+                <h2 className='text-lg font-semibold'>Recommended Products</h2>
+                <p className='text-sm text-gray-500'>Top suggestions based on your search.</p>
+              </div>
+            </div>
+            <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+              {recommendedProducts.map((item) => (
+                <ProductItem key={item._id} name={item.name} id={item._id} price={item.price} image={item.image} />
+              ))}
+            </div>
+          </div>
+        )}
 
       </div>
     </div>
