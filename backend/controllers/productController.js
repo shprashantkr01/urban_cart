@@ -15,69 +15,69 @@ const searchCache = new Map();
 // ─────────────────────────────────────────────
 
 const addProduct = async (req, res) => {
-    try {
-        const { name, description, price, category, subCategory, sizes, bestseller } = req.body;
+  try {
+    const { name, description, price, category, subCategory, sizes, bestseller } = req.body;
 
-        const image1 = req.files.image1?.[0];
-        const image2 = req.files.image2?.[0];
-        const image3 = req.files.image3?.[0];
-        const image4 = req.files.image4?.[0];
+    const image1 = req.files.image1?.[0];
+    const image2 = req.files.image2?.[0];
+    const image3 = req.files.image3?.[0];
+    const image4 = req.files.image4?.[0];
 
-        const images = [image1, image2, image3, image4].filter(Boolean);
+    const images = [image1, image2, image3, image4].filter(Boolean);
 
-        const imagesUrl = await Promise.all(
-            images.map(async (item) => {
-                const result = await cloudinary.uploader.upload(item.path, { resource_type: "image" });
-                return result.secure_url;
-            })
-        );
+    const imagesUrl = await Promise.all(
+      images.map(async (item) => {
+        const result = await cloudinary.uploader.upload(item.path, { resource_type: "image" });
+        return result.secure_url;
+      })
+    );
 
-        const productData = {
-            name,
-            description,
-            category,
-            price: Number(price),
-            subCategory,
-            bestseller: bestseller === "true",
-            sizes: JSON.parse(sizes),
-            image: imagesUrl,
-            date: Date.now()
-        };
+    const productData = {
+      name,
+      description,
+      category,
+      price: Number(price),
+      subCategory,
+      bestseller: bestseller === "true",
+      sizes: JSON.parse(sizes),
+      image: imagesUrl,
+      date: Date.now()
+    };
 
-        await new productModel(productData).save();
+    await new productModel(productData).save();
 
-        res.json({ success: true, message: "Product Added" });
+    res.json({ success: true, message: "Product Added" });
 
-    } catch (error) {
-        res.json({ success: false, message: error.message });
-    }
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
 };
 
 const listProducts = async (req, res) => {
-    try {
-        const products = await productModel.find({});
-        res.json({ success: true, products });
-    } catch (error) {
-        res.json({ success: false, message: error.message });
-    }
+  try {
+    const products = await productModel.find({});
+    res.json({ success: true, products });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
 };
 
 const removeProduct = async (req, res) => {
-    try {
-        await productModel.findByIdAndDelete(req.body.id);
-        res.json({ success: true, message: "Product Removed" });
-    } catch (error) {
-        res.json({ success: false, message: error.message });
-    }
+  try {
+    await productModel.findByIdAndDelete(req.body.id);
+    res.json({ success: true, message: "Product Removed" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
 };
 
 const singleProduct = async (req, res) => {
-    try {
-        const product = await productModel.findById(req.body.productId);
-        res.json({ success: true, product });
-    } catch (error) {
-        res.json({ success: false, message: error.message });
-    }
+  try {
+    const product = await productModel.findById(req.body.productId);
+    res.json({ success: true, product });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
 };
 
 
@@ -86,21 +86,21 @@ const singleProduct = async (req, res) => {
 // ─────────────────────────────────────────────
 
 const scoreProduct = (product, filters) => {
-    let score = 0;
+  let score = 0;
 
-    if (filters.category && product.category === filters.category) score += 3;
-    if (filters.subCategory && product.subCategory === filters.subCategory) score += 2;
-    if (filters.maxPrice && product.price <= filters.maxPrice) score += 1;
+  if (filters.category && product.category === filters.category) score += 3;
+  if (filters.subCategory && product.subCategory === filters.subCategory) score += 2;
+  if (filters.maxPrice && product.price <= filters.maxPrice) score += 1;
 
-    if (filters.keywords?.length) {
-        filters.keywords.forEach(k => {
-            const keyword = k.toLowerCase();
-            if (product.name.toLowerCase().includes(keyword)) score += 3;
-            if (product.description.toLowerCase().includes(keyword)) score += 2;
-        });
-    }
+  if (filters.keywords?.length) {
+    filters.keywords.forEach(k => {
+      const keyword = k.toLowerCase();
+      if (product.name.toLowerCase().includes(keyword)) score += 3;
+      if (product.description.toLowerCase().includes(keyword)) score += 2;
+    });
+  }
 
-    return score;
+  return score;
 };
 
 
@@ -508,40 +508,59 @@ const aiSearchProducts = async (req, res) => {
 // ─────────────────────────────────────────────
 
 const generateDescription = async (req, res) => {
-    try {
-        const { name, category, subCategory } = req.body;
+  const { name, category, subCategory } = req.body;
 
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash"
-        });
+  if (!name) {
+    return res.status(400).json({ success: false, message: "Product name is required" });
+  }
 
-        const prompt = `
-Write a premium product description (max 40 words).
+  const prompt = `Write a premium product description (max 40 words).
+Do not wrap the response in quotes.
 
 Product:
-${name}, ${category}, ${subCategory}
-`;
+${name}, ${category}, ${subCategory}`;
+  // ── Try Gemini first ─────────────────────────────
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const result = await model.generateContent(prompt);
+    console.log("Task Completed Successfully with Gemini");
+    return res.json({
+      success: true,
+      description: result.response.text().trim()
+    });
 
-        const result = await model.generateContent(prompt);
+  } catch (geminiError) {
+    console.log("⚠️ Gemini failed, switching to Groq...");
 
-        res.json({
-            success: true,
-            description: result.response.text().trim()
-        });
+    // ── Groq fallback ────────────────────────────────
+    try {
+      const completion = await groq.chat.completions.create({
+        model: "llama-3.1-8b-instant",
+        temperature: 0.7,
+        max_tokens: 100,
+        messages: [{ role: "user", content: prompt }]
+      });
+      console.log("Task Completed Successfully with Groq");
+      return res.json({
+        success: true,
+        description: completion.choices[0].message.content.trim()
+      });
 
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+    } catch (groqError) {
+      console.error("❌ Groq also failed:", groqError.message);
+      return res.status(500).json({ success: false, message: "Failed to generate description" });
     }
+  }
 };
 
 
 // ─────────────────────────────────────────────
 
 export {
-    listProducts,
-    addProduct,
-    removeProduct,
-    singleProduct,
-    aiSearchProducts,
-    generateDescription
+  listProducts,
+  addProduct,
+  removeProduct,
+  singleProduct,
+  aiSearchProducts,
+  generateDescription
 };

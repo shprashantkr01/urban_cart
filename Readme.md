@@ -1,64 +1,243 @@
-Urban Cart 🛒
+# Urban Cart 🛒
 
-Urban Cart is a full-stack e-commerce web application built using modern web technologies. The project is structured into three main modules — Frontend, Backend, and Admin Panel — each running independently to maintain modularity and scalability.
+A full-stack e-commerce web application built with the **MERN stack**, featuring AI-powered product search and automated description generation.
 
-🛠 Tech Stack
-- Frontend: React.js, Tailwind CSS
-- Backend: Node.js, Express.js
-- Admin Panel: React.js, Tailwind CSS
-- Database:(Add MongoDB, MySQL, or your database name here)
-- Deployment: (Optional — if deployed)
 
-📚 Project Structure
-- `/frontend` → User-facing e-commerce website
-- `/backend` → Server-side APIs and database handling
-- `/admin` → Admin dashboard for product and order management
 
-Each module needs to be run separately for local development.
+---
 
-🚀 How to Run Locally
+## 🚀 Live Features
 
-1. Clone the repository
-2. install dependencies
-3. run each module separately 
-4. enjoy 
+- 🔐 **Secure Authentication** — JWT access tokens + refresh tokens + rate limiting
+- 🤖 **AI Search** — Natural language product search powered by Google Gemini & Groq
+- ✍️ **AI Description Generator** — Auto-generate product descriptions in the admin panel
+- 🛍️ **Product Catalog** — Browse, filter, and sort across Men / Women / Kids categories
+- 🛒 **Cart & Orders** — Full cart management with order tracking
+- 💳 **Multiple Payments** — Stripe, Razorpay, and Cash on Delivery
+- 📦 **Admin Panel** — Separate dashboard to manage products and orders
+- 🔍 **Smart Recommendations** — Similar and recommended products after AI search
 
-📸 Screenshots
+---
 
-# About Page
-![About Page](./screenshots/about.png)
+## 🧱 Tech Stack
 
-### Collection Page
-![Collection Page](./screenshots/collections.png)
+| Layer | Technology |
+|---|---|
+| Frontend | React.js, Tailwind CSS, Context API |
+| Backend | Node.js, Express.js |
+| Database | MongoDB, Mongoose |
+| Auth | JWT (Access + Refresh Tokens), bcrypt |
+| AI | Google Gemini 2.5 Flash, Groq (LLaMA 3.1) |
+| Payments | Stripe, Razorpay |
+| Storage | Cloudinary (image uploads) |
+| Security | express-rate-limit, httpOnly cookies |
 
-### Contact Page
-![Contact Page](./screenshots/contact.png)
+---
 
-### Login Page
-![Login Page](./screenshots/login.png)
+## 📁 Project Structure
 
-### Cart Page
-![Cart Page](./screenshots/cart.png)
+```
+urban-cart/
+├── frontend/          # React storefront
+│   └── src/
+│       ├── pages/     # Collection, Product, Cart, Orders...
+│       ├── components/# Navbar, SearchBar, ProductItem...
+│       ├── context/   # ShopContext (global state)
+│       └── api.js     # Axios instance with token interceptor
+│
+├── backend/           # Node.js + Express API
+│   ├── controllers/   # Business logic
+│   ├── models/        # Mongoose schemas
+│   ├── routes/        # API routes
+│   ├── middleware/    # Auth, AdminAuth, RateLimiter
+│   └── config/        # MongoDB, Cloudinary setup
+│
+└── admin/             # Separate React admin panel
+    └── src/
+        └── pages/     # Add, List, Orders
+```
 
-### Orders Page
-![Orders Page](./screenshots/orders.png)
+---
 
-### Product List (Admin)
-![Product List Page](./screenshots/list.png)
+## ⚙️ Setup & Installation
 
-### Add Product (Admin)
-![Add Product Page](./screenshots/add.png)
+### Prerequisites
+- Node.js v18+
+- MongoDB (local or Atlas)
+- Cloudinary account
+- Stripe and Razorpay accounts
+- Google AI Studio API key (free)
+- Groq API key (free)
 
-✨ Features
-1. User authentication and registration
+---
 
-2. Dynamic product browsing
+### 1. Clone the repository
+```bash
+git clone https://github.com/shprashantkr01/urban_cart.git
+cd urban-cart
+```
 
-3. Add to cart and checkout
+---
 
-4. Order management system
+### 2. Backend Setup
 
-5. Admin dashboard for managing products, orders, and users
+```bash
+cd backend
+npm install
+```
 
-6. Responsive design compatible with mobile and desktop devices
+Create a `.env` file in `/backend`:
 
+```env
+# Server
+PORT=4000
+
+# Database
+MONGODB_URI=your_mongodb_connection_string
+
+# Auth
+JWT_SECRET=your_jwt_secret_key
+JWT_REFRESH_SECRET=your_jwt_refresh_secret_key
+
+# Admin
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=your_admin_password
+
+# Cloudinary
+CLOUDINARY_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_SECRET_KEY=your_secret_key
+
+# AI
+GEMINI_API_KEY=your_gemini_api_key
+GROQ_API_KEY=your_groq_api_key
+
+# Payments
+STRIPE_SECRET_KEY=your_stripe_secret_key
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_secret
+```
+
+Start the backend:
+```bash
+npm run dev
+```
+
+---
+
+### 3. Seed the database (optional but recommended)
+
+```bash
+node seedData.js
+```
+
+This inserts 90 products, 10 users, and 35+ orders. All user passwords are `Test@1234`.
+
+---
+
+### 4. Frontend Setup
+
+```bash
+cd frontend
+npm install
+```
+
+Create `.env` in `/frontend`:
+```env
+VITE_BACKEND_URL=http://localhost:4000
+```
+
+Start the frontend:
+```bash
+npm run dev
+```
+
+---
+
+### 5. Admin Panel Setup
+
+```bash
+cd admin
+npm install
+```
+
+Create `.env` in `/admin`:
+```env
+VITE_BACKEND_URL=http://localhost:4000
+```
+
+Start the admin panel:
+```bash
+npm run dev
+```
+
+---
+
+## 🔑 Getting Free API Keys
+
+| Service | Link | Free Tier |
+|---|---|---|
+| Google Gemini | [aistudio.google.com](https://aistudio.google.com) | 1500 req/day |
+| Groq | [console.groq.com](https://console.groq.com) | Generous daily limits |
+| Cloudinary | [cloudinary.com](https://cloudinary.com) | 25 credits/month |
+
+---
+
+## 🤖 AI Features
+
+See [AI_FEATURES.md](./AI_FEATURES.md) for a detailed breakdown of how the AI features work.
+
+---
+
+## 📡 API Documentation
+
+See [API.md](./API.md) for complete API reference with request/response examples.
+
+---
+
+## 🔐 Authentication Flow
+
+```
+Register / Login
+      ↓
+Access Token (15 min) → stored in localStorage
+Refresh Token (7 days) → stored in httpOnly cookie
+      ↓
+Every request → Authorization: Bearer <accessToken>
+      ↓
+Token expired? → auto-refresh via /api/user/refresh
+      ↓
+Refresh expired? → redirect to login
+```
+
+---
+
+## 📸 Screenshots
+
+> Add screenshots of your app here after deployment
+
+| Page | Description |
+|---|---|
+| Home | Hero section, bestsellers, latest collection |
+| Collection | Product grid with AI search and filter pills |
+| Product | Product detail with related items |
+| Admin | Add products with AI description generator |
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Google OAuth (Sign in with Google)
+- [ ] Product reviews and ratings
+- [ ] Vector embeddings for semantic search (RAG)
+- [ ] Email verification on registration
+- [ ] Order email notifications
+
+---
+
+## 👨‍💻 Author
+
+**Prashant Kumar Sharma**
+- GitHub: [@shprashantkr01](https://github.com/shprashantkr01)
+- LinkedIn: [linkedin.com/in/prashant-sharma-mern-developer](www.linkedin.com/in/prashant-sharma-mern-developer)
+- Email: sh.prashantkr01@gmail.com
