@@ -3,6 +3,16 @@
 A full-stack e-commerce web application built with the **MERN stack**, featuring AI-powered product search and automated description generation.
 
 
+Uploading Screen Recording 2026-05-02 101101.mp4…
+
+
+
+Uploading Screen Recording 2026-05-02 095751.mp4…
+
+
+
+
+
 
 ---
 
