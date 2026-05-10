@@ -10,10 +10,14 @@ const productSchema = new mongoose.Schema({
     subCategory: { type: String, required: true },
     sizes: { type: Array, required: true },
     bestseller: { type: Boolean },
-    date: { type: Number, required: true }
+    date: { type: Number, required: true },
+    tags: {type: [String],default: []},
+    semanticKeywords: {type: [String],default: []},
+    searchableText: {type: String,default: ""},
+    embedding: {type: [Number],default: []}
 })
 
 // If the product already exists in the mongoose use it otherwise create a new product.
-const productModel  = mongoose.models.product || mongoose.model("product",productSchema);
+const productModel = mongoose.models.product || mongoose.model("product", productSchema);
 
 export default productModel
